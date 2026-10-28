@@ -1,0 +1,151 @@
+#!name=All-in-One by Xuân Trườngg 🤪🧩 | YouTube, Music, Photo, Bilibili, Locket
+#!desc=Gộp 9 module theo yêu cầu: YouTube, SoundCloud, Spotify, Picsart, Wink, Bilibili Ads, Bili1080P, Lightroom, Locket. Ngày gộp: 28/10/2026.
+
+# NHẬP VÀO SHADOWROCKET
+# Tắt các module cũ tương ứng để tránh chạy trùng.
+# Các mục HTTPS cần bật giải mã HTTPS/MITM và chứng chỉ CA được tin cậy trên thiết bị.
+# Script JavaScript vẫn được tải từ các URL bên dưới; đây không phải bản dùng ngoại tuyến.
+# Đã kiểm tra cấu trúc và liên kết; chưa thử trực tiếp trên iPhone/Shadowrocket.
+# Locket: script gốc áp dụng cho api.revenuecat.com dùng chung với nhiều ứng dụng;
+# có thể sửa phản hồi/tiêu đề của ứng dụng khác dùng RevenueCat.
+# Spotify: nguồn ghi chỉ hỗ trợ một phần Premium, không bảo đảm chất lượng Very High.
+
+# NGUỒN VÀ GHI CÔNG
+# YouTubeAd.sgmodule — Maasea: https://yfamilys.com/module/YouTubeAd.sgmodule
+# soundcloud.module: https://yfamilys.com/module/soundcloud.module
+# spotifyVIP.module: https://yfamilys.com/module/spotifyVIP.module
+# picsart.module — NobyDa: https://yfamilys.com/module/picsart.module
+# wink.module — yqc007: https://yfamilys.com/module/wink.module
+# biliad.module — ddgksf2013: https://yfamilys.com/module/biliad.module
+# bili.module: https://yfamilys.com/module/bili.module
+# lightroom.module — I-am-R-E: https://yfamilys.com/module/lightroom.module
+# Locket_Gold_Nobita.sgmodule: https://raw.githubusercontent.com/DungHoang120401/Nobita/refs/heads/main/Module/Locket_Gold_Nobita.sgmodule
+# Các script giữ ghi công của tác giả gốc tại URL tương ứng.
+
+# ĐIỀU CHỈNH KHI GỘP
+# YouTube: thay tham số mẫu bằng giá trị cụ thể, bỏ engine chưa được điền; tắt dịch tự động.
+# Sửa cú pháp chuyển hướng sim_code Bilibili và thêm app.biliintl.com vào MITM.
+# Bilibili: tách hai handler DynAll, chuyển View sang endpoint viewunite được script hiện tại hỗ trợ, bật chế độ binary cho protobuf.
+# Bỏ mục trùng bili.module/Bili1080P; chức năng đã có trong nguồn trước.
+# Thay script đã 404: https://raw.githubusercontent.com/deezertidal/private/master/js-backup/Script/bilibili_json.js
+# Dùng bản lưu tác giả gốc ddgksf2013 ngày 31/03/2025; riêng dynamic_history/new dùng bản lưu 2022 để giữ endpoint cũ. Đây là bản thay thế từ tác giả gốc, chưa xác minh giống từng byte với bản sao đã mất.
+# Thay script đã 404: https://github.com/deezertidal/private/raw/master/js-backup/Rewrite/Function/Bilibili_CC.conf
+# Thay đường dẫn .conf hỏng bằng JavaScript của tác giả gốc; bổ sung hostname và mẫu URL phụ đề theo cấu hình gốc.
+
+[Rule]
+
+# Nguồn: https://yfamilys.com/module/YouTubeAd.sgmodule
+AND,((DOMAIN-SUFFIX,googlevideo.com),(PROTOCOL,UDP)),REJECT
+AND,((DOMAIN,youtubei.googleapis.com),(PROTOCOL,UDP)),REJECT
+
+[URL Rewrite]
+
+# Nguồn: https://yfamilys.com/module/YouTubeAd.sgmodule
+(^https?:\/\/[\w-]+\.googlevideo\.com\/(?!dclk_video_ads).+?)&ctier=L(&.+?),ctier,(.+) $1$2$3 302
+^https?:\/\/[\w-]+\.googlevideo\.com\/(?!(dclk_video_ads|videoplayback\?)).+&oad _ reject-200
+^https?:\/\/(www|s)\.youtube\.com\/api\/stats\/ads _ reject-200
+^https?:\/\/(www|s)\.youtube\.com\/(pagead|ptracking) _ reject-200
+^https?:\/\/s\.youtube\.com\/api\/stats\/qoe\?adcontext _ reject-200
+
+# Nguồn: https://yfamilys.com/module/biliad.module
+#～BiliBili_哔哩哔哩_屏蔽IP请求@ddgksf2013
+^https?:\/\/app\.bilibili\.com\/x\/resource\/ip - reject
+#～BiliBili_哔哩哔哩_屏蔽DefaultWord@ddgksf2013
+^https?:\/\/app\.bilibili\.com\/bilibili\.app\.interface\.v1\.Search\/Default - reject
+#～BiliBili_哔哩哔哩_屏蔽首页右上活动[卸载重装]@ddgksf2013
+^https?:\/\/app\.bilibili\.com\/x\/resource\/top\/activity - reject-dict
+#～BiliBili_哔哩哔哩_应用开屏去广告@bm7
+^https://app.bilibili.com/x/v2/splash/show - reject-dict
+#～BiliBili_哔哩哔哩_Defaultword@ddgksf2013
+^https://app.bilibili.com/x/v2/search/defaultwords - reject-dict
+#～BiliBili_哔哩哔哩_Material_Ad@ddgksf2013
+^https?:\/\/api\.bilibili\.com\/x\/vip\/ads\/material\/report - reject-dict
+#～BiliBili_哔哩哔哩_小卡片广告@ddgksf2013
+^https://api.bilibili.com/pgc/season/player/cards - reject-dict
+#～BiliBili_哔哩哔哩_解除SIM卡地区限制
+(^https?:\/\/app\.biliintl\.com\/intl\/.+)(&sim_code=\d+)(.+) $1$3 302
+#～BiliBili_哔哩哔哩_去除搜索中的大家都在搜@bm7
+^https?:\/\/api\.vc\.bilibili\.com\/search_svr\/v\d\/Search\/recommend_words - reject
+#～BiliBili_哔哩哔哩_去除动态中的话题@bm7
+^https?:\/\/api\.vc\.bilibili\.com\/topic_svr\/v1\/topic_svr - reject-dict
+#～BiliBili_哔哩哔哩_可能的一些推广(beta)@bm7
+^https?:\/\/api\.bilibili\.com\/pgc\/season\/app\/related\/recommend\? - reject-dict
+#～BiliBili_哔哩哔哩_漫画去广告@ddgksf2013
+^https?:\/\/manga\.bilibili\.com\/twirp\/comic\.v\d\.Comic\/(Flash|ListFlash) - reject-dict
+
+[Header Rewrite]
+
+# Nguồn: https://yfamilys.com/module/spotifyVIP.module
+http-request ^https:\/\/(spclient\.wg\.spotify\.com|.*-spclient\.spotify\.com(:443)?)\/user-customization-service\/v1\/customize$ header-del if-none-match
+
+[Script]
+
+# Nguồn: https://yfamilys.com/module/YouTubeAd.sgmodule
+youtube.response = type=http-response,pattern=^https:\/\/youtubei\.googleapis\.com\/youtubei\/v1\/(browse|next|player|search|reel\/reel_watch_sequence|guide|account\/get_setting|get_watch),requires-body=1,max-size=-1,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/Youtube/youtube.response.js,argument="{"lyricLang":"off","captionLang":"off","blockUpload":true,"blockImmersive":true,"blockShorts":false,"debug":false}"
+
+# Nguồn: https://yfamilys.com/module/soundcloud.module
+SoundCloudGo+ = type=http-response,pattern=https://api-mobile.soundcloud.com/configuration/ios,requires-body=1,script-path=https://raw.githubusercontent.com/Marol62926/MarScrpt/main/soundcloud.js
+
+# Nguồn: https://yfamilys.com/module/spotifyVIP.module
+spotify-json = type=http-request,pattern=^https:\/\/(spclient\.wg\.spotify\.com|.*-spclient\.spotify\.com(:443)?)\/(artistview\/v1\/artist|album-entity-view\/v2\/album)\/,requires-body=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/spotify-json.js
+spotify-proto = type=http-response,pattern=^https:\/\/(spclient\.wg\.spotify\.com|.*-spclient\.spotify\.com(:443)?)\/(bootstrap\/v1\/bootstrap|user-customization-service\/v1\/customize)$,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/spotify-proto.js,script-update-interval=0
+
+# Nguồn: https://yfamilys.com/module/picsart.module
+Picsart = type=http-response,pattern=https:\/\/api\.(picsart|meiease)\.c(n|om)\/users\/show\/me\.json,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/PicsArt.js
+
+# Nguồn: https://yfamilys.com/module/wink.module
+WinkForeverVipCrack.js = type=http-response,pattern=^https?:\/\/api-sub\.meitu\.com\/v2\/user\/vip_info_by_group\.json,requires-body=1,script-path=https://raw.githubusercontent.com/yqc007/QuantumultX/master/WinkForeverVipCrack.js
+
+# Nguồn: https://yfamilys.com/module/biliad.module
+#～BiliBili_哔哩哔哩_繁体CC字幕转中文简体[自行启用]@ddgksf2013
+# Thay URL nguồn đã 404: https://github.com/deezertidal/private/raw/master/js-backup/Rewrite/Function/Bilibili_CC.conf
+biliad = type=http-response,pattern=^https?:\/\/.*\.hdslb\.com\/bfs\/subtitle\/.+\.json,requires-body=1,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/bilibili_cc.js
+#～BiliBili_哔哩哔哩_观影页面去广告@ddgksf2013
+# Thay URL nguồn đã 404: https://raw.githubusercontent.com/deezertidal/private/master/js-backup/Script/bilibili_json.js
+biliad1 = type=http-response,pattern=^https?:\/\/api\.(bilibili|biliapi)\.(com|net)\/pgc\/page\/cinema\/tab\?,requires-body=1,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/31d094a56d9dd8a8f614b8a94d6aa85b30c7a6c1/bilibili_json.js
+#～BiliBili_哔哩哔哩_应用开屏广告预加载@yjqiang
+# Thay URL nguồn đã 404: https://raw.githubusercontent.com/deezertidal/private/master/js-backup/Script/bilibili_json.js
+biliad2 = type=http-response,pattern=^https:\/\/app\.bilibili\.com\/x\/v2\/splash\/list,requires-body=1,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/31d094a56d9dd8a8f614b8a94d6aa85b30c7a6c1/bilibili_json.js
+#～BiliBili_哔哩哔哩_去除统一设置的皮肤@ddgksf2013
+# Thay URL nguồn đã 404: https://raw.githubusercontent.com/deezertidal/private/master/js-backup/Script/bilibili_json.js
+biliad3 = type=http-response,pattern=^https?:\/\/app\.bilibili\.com\/x\/resource\/show\/skin\?,requires-body=1,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/31d094a56d9dd8a8f614b8a94d6aa85b30c7a6c1/bilibili_json.js
+#～BiliBili_哔哩哔哩_1080P高码率+4K画质(番剧和影视除外)@ddgksf2013
+# Thay URL nguồn đã 404: https://raw.githubusercontent.com/deezertidal/private/master/js-backup/Script/bilibili_json.js
+biliad4 = type=http-response,pattern=^https?:\/\/app\.bilibili\.com\/x\/v2\/account\/myinfo\?,requires-body=1,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/31d094a56d9dd8a8f614b8a94d6aa85b30c7a6c1/bilibili_json.js
+#～BiliBili_哔哩哔哩_热搜发现@ddgksf2013
+# Thay URL nguồn đã 404: https://raw.githubusercontent.com/deezertidal/private/master/js-backup/Script/bilibili_json.js
+biliad5 = type=http-response,pattern=^https://app.bilibili.com/x/v2/search/square,requires-body=1,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/31d094a56d9dd8a8f614b8a94d6aa85b30c7a6c1/bilibili_json.js
+#～BiliBili_哔哩哔哩_推荐去广告@ddgksf2013
+# Thay URL nguồn đã 404: https://raw.githubusercontent.com/deezertidal/private/master/js-backup/Script/bilibili_json.js
+biliad6 = type=http-response,pattern=^https?:\/\/app\.bilibili\.com\/x\/v2\/feed\/index,requires-body=1,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/31d094a56d9dd8a8f614b8a94d6aa85b30c7a6c1/bilibili_json.js
+#～BiliBili_哔哩哔哩_追番去广告@ddgksf2013
+# Thay URL nguồn đã 404: https://raw.githubusercontent.com/deezertidal/private/master/js-backup/Script/bilibili_json.js
+biliad7 = type=http-response,pattern=^https?:\/\/api\.(bilibili|biliapi)\.(com|net)\/pgc\/page\/bangumi,requires-body=1,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/31d094a56d9dd8a8f614b8a94d6aa85b30c7a6c1/bilibili_json.js
+#～BiliBili_哔哩哔哩_直播去广告@bm7
+# Thay URL nguồn đã 404: https://raw.githubusercontent.com/deezertidal/private/master/js-backup/Script/bilibili_json.js
+biliad8 = type=http-response,pattern=^https?:\/\/api\.live\.bilibili\.com\/xlive\/app-room\/v1\/index\/getInfoByRoom,requires-body=1,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/31d094a56d9dd8a8f614b8a94d6aa85b30c7a6c1/bilibili_json.js
+#～BiliBili_哔哩哔哩_动态去广告@bm7
+# Thay URL nguồn đã 404: https://raw.githubusercontent.com/deezertidal/private/master/js-backup/Script/bilibili_json.js
+# Endpoint dynamic_history/new cần bản lưu cũ; bản 2025 không còn xử lý endpoint này.
+biliad9 = type=http-response,pattern=^https?:\/\/api\.vc\.bilibili\.com\/dynamic_svr\/v1\/dynamic_svr\/dynamic_(history|new)\?,requires-body=1,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/6f2451f199ab73d19a30941c2026cdfad78dd996/bilibili_json.js
+#～BiliBili_哔哩哔哩_标籤页处理@ddgksf2013
+# Thay URL nguồn đã 404: https://raw.githubusercontent.com/deezertidal/private/master/js-backup/Script/bilibili_json.js
+biliad10 = type=http-response,pattern=^https?:\/\/app\.bilibili\.com\/x\/resource\/show\/tab,requires-body=1,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/31d094a56d9dd8a8f614b8a94d6aa85b30c7a6c1/bilibili_json.js
+#～BiliBili_哔哩哔哩_我的页面处理@ddgksf2013
+# Thay URL nguồn đã 404: https://raw.githubusercontent.com/deezertidal/private/master/js-backup/Script/bilibili_json.js
+biliad11 = type=http-response,pattern=^https?:\/\/app\.bilibili\.com\/x\/v2\/account\/mine,requires-body=1,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/31d094a56d9dd8a8f614b8a94d6aa85b30c7a6c1/bilibili_json.js
+#～BiliBili_哔哩哔哩_Proto去广告@app2smile
+# Dùng script này cho View; DynAll do script kế tiếp xử lý để tránh giải nén hai lần.
+biliad12 = type=http-response,pattern=^https:\/\/app\.bilibili\.com\/bilibili\.app\.viewunite\.v1\.View\/View$,requires-body=1,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js,binary-body-mode=1,max-size=-1
+#～BiliBili_哔哩哔哩_动态广告@yjqiang
+biliad13 = type=http-response,pattern=^https://app\.bilibili\.com/bilibili\.app\.dynamic\.v2\.Dynamic/DynAll$,requires-body=1,script-path=https://raw.githubusercontent.com/yjqiang/surge_scripts/main/scripts/bilibili/bilibili_dynamic.js,binary-body-mode=1,max-size=-1
+
+# Nguồn: https://yfamilys.com/module/lightroom.module
+LightRoom = type=http-response,pattern=^https:\/\/photos\.adobe\.io\/v2\/accounts*,requires-body=1,script-path=https://raw.githubusercontent.com/litieyin/AD_VIP/main/Script/lightroom.js
+
+# Nguồn: https://raw.githubusercontent.com/DungHoang120401/Nobita/refs/heads/main/Module/Locket_Gold_Nobita.sgmodule
+revenuecat = type=http-response,pattern=^https:\/\/api\.revenuecat\.com\/.+\/(receipts$|subscribers\/[^/]+$),script-path=https://raw.githubusercontent.com/DungHoang120401/Nobita/refs/heads/main/Scripts/Locket_Gold.js,requires-body=true,max-size=-1,timeout=60
+deleteHeader = type=http-request,pattern=^https:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers),script-path=https://raw.githubusercontent.com/DungHoang120401/Nobita/refs/heads/main/Scripts/LKG_delete_header.js,timeout=60
+
+[MITM]
+hostname = %APPEND% -redirector*.googlevideo.com, *.googlevideo.com, www.youtube.com, s.youtube.com, youtubei.googleapis.com, api-mobile.soundcloud.com, spclient.wg.spotify.com, *spclient.spotify.com, api.picsart.c*, api.meiease.c*, api-sub.meitu.com, app.bilibili.com, api.live.bilibili.com, api.vc.bilibili.com, api.bilibili.com, manga.bilibili.com, grpc.biliapi.net, api.biliapi.net, -broadcast.chat.bilibili.com, -*cdn*.biliapi.net, -*tracker*.biliapi.net, app.biliintl.com, aisubtitle.hdslb.com, i0.hdslb.com, photos.adobe.io, api.revenuecat.com
